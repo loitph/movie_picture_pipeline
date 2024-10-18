@@ -1,0 +1,101 @@
+name: Frontend Continuous Integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+
+env:
+  NODE_VERSION: '18.x'
+
+jobs:
+  linting-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checking out
+      uses: actions/checkout@v3
+
+    - name: Setting up NodeJS
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Caching NodeJS Modules
+      uses: actions/cache@v4
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: ${{ runner.os }}-node-
+
+    - name: Installing package dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Linting Job
+      run: |
+        cd frontend
+        npm run lint
+
+  testing-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checking out
+      uses: actions/checkout@v3
+
+    - name: Setting up NodeJS
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Caching NodeJS Modules
+      uses: actions/cache@v4
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: ${{ runner.os }}-node-
+
+    - name: Installing package dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Testing backend
+      run: |
+        cd frontend
+        npm run test
+
+  build-job:
+    needs: [linting-job, testing-job]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checking out
+      uses: actions/checkout@v3
+
+    - name: Setting up NodeJS
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Caching NodeJS Modules
+      uses: actions/cache@v4
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: ${{ runner.os }}-node-
+
+    - name: Installing package dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Run Build
+      run: |
+        cd frontend
+        export REACT_APP_MOVIE_API_URL=http://localhost:5000
+        docker build --build-arg=REACT_APP_MOVIE_API_URL --tag movie-picture-fe:latest .
+        docker run -p 3000:3000 --name movie-picture-fe -d movie-picture-fe

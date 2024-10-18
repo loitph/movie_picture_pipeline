@@ -1,0 +1,94 @@
+name: Backend Continuous Integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+
+env:
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  linting-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checking out
+      uses: actions/checkout@v4
+
+    - name: Setting up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Setting up Python virtual environment
+      run: |
+        cd backend
+        pip install pipenv
+
+    - name: Installing package dependencies
+      run: |
+        cd backend
+        pipenv install --dev
+
+    - name: Linting Job
+      run: |
+        cd backend
+        pipenv run flake8 .
+  
+  testing-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checking out
+      uses: actions/checkout@v4
+
+    - name: Setting up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Setting up Python virtual environment
+      run: |
+        cd backend
+        pip install pipenv
+
+    - name: Installing package dependencies
+      run: |
+        cd backend
+        pipenv install --dev
+
+    - name: Testing backend
+      run: |
+        cd backend
+        pipenv run pytest
+
+  build-job:
+    needs: [linting-job, testing-job]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checking out
+      uses: actions/checkout@v3
+
+    - name: Setting up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Setting up Python virtual environment
+      run: |
+        cd backend
+        pip install pipenv
+
+    - name: Installing package dependencies
+      run: |
+        cd backend
+        pipenv install --dev
+
+    - name: Docker build and run
+      run: |
+        cd backend
+        docker build --tag movie-picture-be:latest .
+        docker run -p 5000:5000 --name movie-picture-be -d movie-picture-be
