@@ -89,7 +89,7 @@ jobs:
     - name: Docker build repository
       env:
         IMAGE_TAG: latest
-        REPOSITORY: movie-picture-be
+        REPOSITORY: movie-picture-be # refer backend deployment file
       run: |
         cd backend
         docker build -t $REPOSITORY .
@@ -109,13 +109,13 @@ jobs:
       env:
         IMAGE_TAG: latest
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        REPOSITORY: movie-picture-be
+        REPOSITORY: movie-picture-be # refer backend deployment file
       run: docker tag $REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
     - name: Docker pushing image to ECR AWS
       env:
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        REPOSITORY: movie-picture-be
+        REPOSITORY: movie-picture-be # refer backend deployment file
         IMAGE_TAG: latest
       run: docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
@@ -129,7 +129,7 @@ jobs:
       env:
         IMAGE_TAG: latest
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        REPOSITORY: movie-picture-be
+        REPOSITORY: movie-picture-be # refer backend deployment file
       run: |
         cd backend/k8s
         kustomize edit set image $REPOSITORY=$REGISTRY/$REPOSITORY:$IMAGE_TAG

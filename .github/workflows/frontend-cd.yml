@@ -98,7 +98,7 @@ jobs:
     - name: Docker build repository
       env:
         IMAGE_TAG: latest
-        REPOSITORY: movie-picture-fe
+        REPOSITORY: movie-picture-fe # refer frontend deployment file
         REACT_APP_MOVIE_API_URL: ${{ secrets.REACT_APP_MOVIE_API_URL }}
       run: |
         cd frontend
@@ -120,14 +120,14 @@ jobs:
       env:
         IMAGE_TAG: latest
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        REPOSITORY: movie-picture-fe
+        REPOSITORY: movie-picture-fe # refer frontend deployment file
       run: docker tag $REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
     - name: Docker pushing image to ECR AWS
       env:
         IMAGE_TAG: latest
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        REPOSITORY: movie-picture-fe
+        REPOSITORY: movie-picture-fe # refer frontend deployment file
       run: docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
     - name: Login to EKS Cluster
@@ -140,7 +140,7 @@ jobs:
       env:
         IMAGE_TAG: latest
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        REPOSITORY: movie-picture-fe
+        REPOSITORY: movie-picture-fe # refer frontend deployment file
       run: |
         cd frontend/k8s
         kustomize edit set image $REPOSITORY=$REGISTRY/$REPOSITORY:$IMAGE_TAG
